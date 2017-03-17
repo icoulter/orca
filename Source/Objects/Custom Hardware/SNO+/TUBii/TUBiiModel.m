@@ -748,11 +748,8 @@ NSString* ORTubiiLock				= @"ORTubiiLock";
     /*
      Start a thread to constantly send a keep alive signal to the smellie interlock server
      */
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
     [self setKeepAliveThread:[[NSThread alloc] initWithTarget:self selector:@selector(pulseKeepAlive:) object:nil]];
     [[self keepAliveThread] start];
-    [pool release];
 }
 
 -(void)pulseKeepAlive:(id)passed
@@ -760,6 +757,8 @@ NSString* ORTubiiLock				= @"ORTubiiLock";
     /*
      A fuction to be run in a thread, continually sending keep alive pulses to the interlock server
      */
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
     while (![[self keepAliveThread] isCancelled]) {
         @try{
             [self sendOkCmd:@"keepAlive"];
@@ -770,6 +769,7 @@ NSString* ORTubiiLock				= @"ORTubiiLock";
         [NSThread sleepForTimeInterval:0.1];
     }
     NSLog(@"[TUBii]: Stopped sending keep-alive to TUBii - ELLIE pulses will be shut off\n");
+    [pool release];
 }
 
 -(void)killKeepAlive
