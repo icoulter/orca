@@ -109,6 +109,7 @@ struct TUBiiState { //A struct that allows users of TUBiiModel to get/set all of
     RedisClient *connection;
     int portNumber;
     NSString* strHostName;//"192.168.80.25";
+    NSThread* _keepAliveThread;
 }
 @property (readonly) BOOL solitaryObject; //Prevents there from being two TUBiis
 @property (nonatomic) int portNumber;

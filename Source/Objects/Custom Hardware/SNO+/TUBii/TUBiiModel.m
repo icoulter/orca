@@ -30,6 +30,8 @@ NSString* ORTubiiLock				= @"ORTubiiLock";
 @implementation TUBiiModel
 #pragma mark •••Synthesized Variables
 
+@synthesize keepAliveThread = _keepAliveThread;
+
 - (void) setUpImage
 {
     NSImage* img = [NSImage imageNamed:@"tubii"];
@@ -761,12 +763,14 @@ NSString* ORTubiiLock				= @"ORTubiiLock";
 
     while (![[self keepAliveThread] isCancelled]) {
         @try{
-            [self sendOkCmd:@"keepAlive"];
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                [self sendOkCmd:@"keepAlive"];
+            });
         } @catch(NSException* e) {
             NSLogColor([NSColor redColor], @"[TUBii]: Problem sending keep alive to TUBii server, reason: %@\n", [e reason]);
             return;
         }
-        [NSThread sleepForTimeInterval:0.1];
+        [NSThread sleepForTimeInterval:0.5];
     }
     NSLog(@"[TUBii]: Stopped sending keep-alive to TUBii - ELLIE pulses will be shut off\n");
     [pool release];
