@@ -30,6 +30,8 @@ NSString* ORTubiiLock				= @"ORTubiiLock";
 @implementation TUBiiModel
 #pragma mark •••Synthesized Variables
 
+@synthesize keepAliveThread = _keepAliveThread;
+
 - (void) setUpImage
 {
     NSImage* img = [NSImage imageNamed:@"tubii"];
@@ -118,6 +120,7 @@ NSString* ORTubiiLock				= @"ORTubiiLock";
             [self setPortNumber:TUBII_DEFAULT_PORT];
         }
     }
+    [self activateKeepAlive];
     return self;
 }
 - (void) encodeWithCoder:(NSCoder *)aCoder{
@@ -737,4 +740,52 @@ NSString* ORTubiiLock				= @"ORTubiiLock";
     aState.controlReg = [self controlReg];
     return aState;
 }
+
+//////////////////////////////////////////
+// Keep alive stuff -
+// If ORCA dies we want to force tubii from
+// sending triggers to the ellie system
+-(void)activateKeepAlive
+{
+    /*
+     Start a thread to constantly send a keep alive signal to the smellie interlock server
+     */
+    [self setKeepAliveThread:[[NSThread alloc] initWithTarget:self selector:@selector(pulseKeepAlive:) object:nil]];
+    [[self keepAliveThread] start];
+}
+
+-(void)pulseKeepAlive:(id)passed
+{
+    /*
+     A fuction to be run in a thread, continually sending keep alive pulses to the interlock server
+     */
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+    while (![[self keepAliveThread] isCancelled]) {
+        @try{
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                [self sendOkCmd:@"keepAlive"];
+            });
+        } @catch(NSException* e) {
+            NSLogColor([NSColor redColor], @"[TUBii]: Problem sending keep alive to TUBii server, reason: %@\n", [e reason]);
+            return;
+        }
+        [NSThread sleepForTimeInterval:0.5];
+    }
+    NSLog(@"[TUBii]: Stopped sending keep-alive to TUBii - ELLIE pulses will be shut off\n");
+    [pool release];
+}
+
+-(void)killKeepAlive
+{
+    /*
+     Stop pulsing the keep alive and disarm the interlock
+     */
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    [[self keepAliveThread] cancel];
+    NSLog(@"[TUBii]: Killing keep alive - ELLIE pulses will be shut off\n");
+    [pool release];
+}
+
+
 @end

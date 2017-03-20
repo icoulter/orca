@@ -109,6 +109,7 @@ struct TUBiiState { //A struct that allows users of TUBiiModel to get/set all of
     RedisClient *connection;
     int portNumber;
     NSString* strHostName;//"192.168.80.25";
+    NSThread* _keepAliveThread;
 }
 @property (readonly) BOOL solitaryObject; //Prevents there from being two TUBiis
 @property (nonatomic) int portNumber;
@@ -134,6 +135,7 @@ struct TUBiiState { //A struct that allows users of TUBiiModel to get/set all of
 @property (nonatomic) BOOL TUBiiIsLOSrc;
 @property (nonatomic) BOOL CounterMode;
 @property (nonatomic) struct TUBiiState CurrentState; //Get/Sets a struct that fully specifies TUBii's Current state
+@property (nonatomic,retain) NSThread* keepAliveThread;
 
 #pragma mark •••Initialization
 - (id) init;
@@ -192,6 +194,9 @@ struct TUBiiState { //A struct that allows users of TUBiiModel to get/set all of
                                    CounterLZBOn: (bool) LZB
                                   CounterTestOn: (bool) TestMode
                                CounterInhibitOn: (bool) Inhibit;
+-(void)activateKeepAlive;
+-(void)pulseKeepAlive:(id)passed;
+-(void)killKeepAlive;
 @end
 
 extern NSString* ORTubiiLock;
