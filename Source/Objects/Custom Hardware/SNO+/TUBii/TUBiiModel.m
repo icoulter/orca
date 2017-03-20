@@ -781,10 +781,8 @@ NSString* ORTubiiLock				= @"ORTubiiLock";
     /*
      Stop pulsing the keep alive and disarm the interlock
      */
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     [[self keepAliveThread] cancel];
     NSLog(@"[TUBii]: Killing keep alive - ELLIE pulses will be shut off\n");
-    [pool release];
 }
 
 
