@@ -168,7 +168,9 @@ NSString* ORTubiiLock				= @"ORTubiiLock";
         [connection okCommand: [aCmd UTF8String]];
     }
     @catch (NSException *exception) {
-        NSLogColor([NSColor redColor],@"Command: %@ failed.  Reason: %@\n", aCmd,[exception reason]);
+        if(printCheck){
+            NSLogColor([NSColor redColor],@"Command: %@ failed.  Reason: %@\n", aCmd,[exception reason]);
+        }
     }
 }
 - (int) sendIntCmd: (NSString* const) aCmd {
