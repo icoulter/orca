@@ -160,6 +160,17 @@ NSString* ORTubiiLock				= @"ORTubiiLock";
         NSLogColor([NSColor redColor],@"Command: %@ failed.  Reason: %@\n", aCmd,[exception reason]);
     }
 }
+- (void) sendOkCmd:(NSString* const)aCmd print:(BOOL)printCheck{
+    @try {
+        if(printCheck){
+            NSLog(@"Sending %@ to TUBii\n",aCmd);
+        }
+        [connection okCommand: [aCmd UTF8String]];
+    }
+    @catch (NSException *exception) {
+        NSLogColor([NSColor redColor],@"Command: %@ failed.  Reason: %@\n", aCmd,[exception reason]);
+    }
+}
 - (int) sendIntCmd: (NSString* const) aCmd {
     @try {
         NSLog(@"Sending %@ to TUBii\n",aCmd);
@@ -764,7 +775,7 @@ NSString* ORTubiiLock				= @"ORTubiiLock";
     while (![[self keepAliveThread] isCancelled]) {
         @try{
             dispatch_sync(dispatch_get_main_queue(), ^{
-                [self sendOkCmd:@"keepAlive"];
+                [self sendOkCmd:@"keepAlive" print:NO];
             });
         } @catch(NSException* e) {
             NSLogColor([NSColor redColor], @"[TUBii]: Problem sending keep alive to TUBii server, reason: %@\n", [e reason]);
@@ -781,10 +792,8 @@ NSString* ORTubiiLock				= @"ORTubiiLock";
     /*
      Stop pulsing the keep alive and disarm the interlock
      */
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     [[self keepAliveThread] cancel];
     NSLog(@"[TUBii]: Killing keep alive - ELLIE pulses will be shut off\n");
-    [pool release];
 }
 
 
