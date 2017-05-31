@@ -70,10 +70,12 @@ typedef NS_OPTIONS(uint32_t, TRIG_MASK)
     Smellie = 1<<23,
     GT = 1<<24
 };
+
 struct TUBiiState { //A struct that allows users of TUBiiModel to get/set all of TUBii's state at once.
     float smellieRate;
     float tellieRate;
     float pulserRate;
+    float TUBiiPGT_Rate;
     float smelliePulseWidth;
     float telliePulseWidth;
     float pulserPulseWidth;
@@ -92,9 +94,13 @@ struct TUBiiState { //A struct that allows users of TUBiiModel to get/set all of
     uint32_t syncTrigMask;
     uint32_t asyncTrigMask;
     CONTROL_REG_MASK controlReg;
+    NSUInteger MTCAMimic1_ThresholdInBits;
     BOOL CounterMode;
 };
+
 @interface TUBiiModel : OrcaObject{
+@private
+    struct TUBiiState currentState;
     float smellieRate;
     float tellieRate;
     float pulserRate;
@@ -116,6 +122,7 @@ struct TUBiiState { //A struct that allows users of TUBiiModel to get/set all of
 @property (nonatomic,retain) NSString* strHostName;
 @property (nonatomic) NSUInteger smellieDelay;
 @property (nonatomic) NSUInteger tellieDelay;
+@property (nonatomic) float TUBiiPGT_Rate;
 @property (nonatomic) NSUInteger genericDelay;
 @property (nonatomic) NSUInteger MTCAMimic1_ThresholdInBits;
 @property (nonatomic) float MTCAMimic1_ThresholdInVolts;
@@ -134,7 +141,6 @@ struct TUBiiState { //A struct that allows users of TUBiiModel to get/set all of
 @property (nonatomic) BOOL TUBiiIsDefaultClock;
 @property (nonatomic) BOOL TUBiiIsLOSrc;
 @property (nonatomic) BOOL CounterMode;
-@property (nonatomic) struct TUBiiState CurrentState; //Get/Sets a struct that fully specifies TUBii's Current state
 @property (nonatomic,retain) NSThread* keepAliveThread;
 
 #pragma mark •••Initialization
@@ -157,6 +163,10 @@ struct TUBiiState { //A struct that allows users of TUBiiModel to get/set all of
 - (float) MTCAMimic_BitsToVolts: (NSUInteger) BitValue;
 - (void) Initialize;
 - (void) Ping;
+- (struct TUBiiState) currentState;
+- (NSMutableDictionary*) CurrentStateToDict;
+- (void) sendCurrentStateToHW;
+- (void) setCurrentStateFromDict:(NSMutableDictionary*)settingsDict;
 - (void) setTrigMask:(NSUInteger)trigMask setAsyncMask:(NSUInteger)asyncMask;
 - (void) setBurstTrigger;
 - (void) setComboTrigger_EnableMask:(uint32_t) enableMask TriggerMask:(uint32_t) triggerMask;
@@ -202,4 +212,5 @@ struct TUBiiState { //A struct that allows users of TUBiiModel to get/set all of
 -(void)killKeepAlive;
 @end
 
-extern NSString* ORTubiiLock;
+extern NSString* ORTubiiLockNotification;
+extern NSString* ORTubiiSettingsChangedNotification;

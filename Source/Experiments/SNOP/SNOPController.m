@@ -34,6 +34,7 @@
 #import "ORMTCModel.h"
 #import "SNOP_Run_Constants.h"
 #import "SNOCaenModel.h"
+#import "TUBiiModel.h"
 #import "RunTypeWordBits.hh"
 #import "ECARun.h"
 #import "NHitMonitor.h"
@@ -269,6 +270,8 @@ snopGreenColor;
 
     [self initializeUnits];
     [self mtcDataBaseChanged:nil];
+    [self CAENSettingsChanged:nil];
+    [self TUBiiSettingsChanged:nil];
     //Update runtype word
     [self refreshRunWordLabels:nil];
     [self runTypeWordChanged:nil];
@@ -425,6 +428,17 @@ snopGreenColor;
                      selector : @selector(mtcDataBaseChanged:)
                          name : ORMTCGTMaskChanged
                         object: nil];
+
+    [notifyCenter addObserver : self
+                     selector : @selector(CAENSettingsChanged:)
+                         name : SNOCaenSettingsChanged
+                        object: nil];
+
+    [notifyCenter addObserver : self
+                     selector : @selector(TUBiiSettingsChanged:)
+                         name : ORTubiiSettingsChangedNotification
+                        object: nil];
+
     [notifyCenter addObserver : self
                      selector : @selector(updateSettings:)
                          name : @"SNOPSettingsChanged"
@@ -2069,6 +2083,38 @@ err:
     
 }
 
+- (void) CAENSettingsChanged:(NSNotification*)aNotification
+{
+
+    NSArray* objs = [[(ORAppDelegate*)[NSApp delegate] document] collectObjectsOfClass:NSClassFromString(@"SNOCaenModel")];
+    SNOCaenModel* caenModel;
+    if ([objs count]) {
+        caenModel = [objs objectAtIndex:0];
+    } else {
+        NSLogColor([NSColor redColor], @"couldn't find CAEN model. Please add it to the experiment and restart the run.\n");
+        return;
+    }
+
+    [self displayCAENSettings:[caenModel CurrentStateToDict] inMatrix:standardRunCAENCurrentMatrix];
+    
+}
+
+- (void) TUBiiSettingsChanged:(NSNotification*)aNotification
+{
+
+    NSArray* objs = [[(ORAppDelegate*)[NSApp delegate] document] collectObjectsOfClass:NSClassFromString(@"TUBiiModel")];
+    TUBiiModel* tubiiModel;
+    if ([objs count]) {
+        tubiiModel = [objs objectAtIndex:0];
+    } else {
+        NSLogColor([NSColor redColor], @"couldn't find TUBii model. Please add it to the experiment and restart the run.\n");
+        return;
+    }
+
+    [self displayTUBiiSettings:[tubiiModel CurrentStateToDict] inMatrix:standardRunTUBiiCurrentMatrix];
+    
+}
+
 - (IBAction)loadStandardRunFromDBAction:(id)sender
 {
     NSString *standardRun = [standardRunPopupMenu objectValueOfSelectedItem];
@@ -2248,6 +2294,8 @@ err:
         }
     //If in non-DIAGNOSTIC run: display DB threshold values
     } else {
+
+        //MTC
         float mVolts;
         int gtmask = [[runSettings valueForKey:GTMaskSerializationString] intValue];
         
@@ -2275,6 +2323,13 @@ err:
         } else{
             [[standardRunThresStoredValues cellAtRow:11 column:0] setTextColor:[self snopRedColor]];
         }
+
+        //CAEN
+        [self displayCAENSettings:runSettings inMatrix:standardRunCAENDBMatrix];
+
+        //TUBii
+        [self displayTUBiiSettings:runSettings inMatrix:standardRunTUBiiDBMatrix];
+
     }
     
     //Display runtype word
@@ -2285,6 +2340,81 @@ err:
             [[runTypeWordSRMatrix cellAtRow:ibit column:0] setState:0];
         }
     }
+}
+
+- (void) displayCAENSettings:(NSMutableDictionary*) settingsDict inMatrix:(NSMatrix*)aMatrix
+{
+    NSArray* objs = [[(ORAppDelegate*)[NSApp delegate] document] collectObjectsOfClass:NSClassFromString(@"SNOCaenModel")];
+    SNOCaenModel* caenModel;
+    if ([objs count]) {
+        caenModel = [objs objectAtIndex:0];
+    } else {
+        NSLogColor([NSColor redColor], @"couldn't find CAEN model. Please add it to the experiment and restart the run.\n");
+        return;
+    }
+
+    NSNumberFormatter *dacFormat = [[NSNumberFormatter alloc] init];
+    [dacFormat setFormat:@"##.##"];
+    [[aMatrix cellAtRow:0 column:0] setObjectValue:[NSString stringWithFormat:@"0x%X",[[settingsDict valueForKey:@"CAEN_enabledMask"] unsignedIntValue]]];
+    [[aMatrix cellAtRow:1 column:0] setFloatValue:[caenModel convertDacToVolts:[[settingsDict valueForKey:@"CAEN_dac_0"] unsignedShortValue]]];
+    [[aMatrix cellAtRow:1 column:0] setFormatter:dacFormat];
+    [[aMatrix cellAtRow:2 column:0] setFloatValue:[caenModel convertDacToVolts:[[settingsDict valueForKey:@"CAEN_dac_1"] unsignedShortValue]]];
+    [[aMatrix cellAtRow:2 column:0] setFormatter:dacFormat];
+    [[aMatrix cellAtRow:3 column:0] setFloatValue:[caenModel convertDacToVolts:[[settingsDict valueForKey:@"CAEN_dac_2"] unsignedShortValue]]];
+    [[aMatrix cellAtRow:3 column:0] setFormatter:dacFormat];
+    [[aMatrix cellAtRow:4 column:0] setFloatValue:[caenModel convertDacToVolts:[[settingsDict valueForKey:@"CAEN_dac_3"] unsignedShortValue]]];
+    [[aMatrix cellAtRow:4 column:0] setFormatter:dacFormat];
+    [[aMatrix cellAtRow:5 column:0] setFloatValue:[caenModel convertDacToVolts:[[settingsDict valueForKey:@"CAEN_dac_4"] unsignedShortValue]]];
+    [[aMatrix cellAtRow:5 column:0] setFormatter:dacFormat];
+    [[aMatrix cellAtRow:6 column:0] setFloatValue:[caenModel convertDacToVolts:[[settingsDict valueForKey:@"CAEN_dac_5"] unsignedShortValue]]];
+    [[aMatrix cellAtRow:6 column:0] setFormatter:dacFormat];
+    [[aMatrix cellAtRow:7 column:0] setFloatValue:[caenModel convertDacToVolts:[[settingsDict valueForKey:@"CAEN_dac_6"] unsignedShortValue]]];
+    [[aMatrix cellAtRow:7 column:0] setFormatter:dacFormat];
+    [[aMatrix cellAtRow:8 column:0] setFloatValue:[caenModel convertDacToVolts:[[settingsDict valueForKey:@"CAEN_dac_7"] unsignedShortValue]]];
+    [[aMatrix cellAtRow:8 column:0] setFormatter:dacFormat];
+    [[aMatrix cellAtRow:9 column:0] setObjectValue:[NSString stringWithFormat:@"0x%X",[[settingsDict valueForKey:@"CAEN_triggerSourceMask"] unsignedIntValue]]];
+    [[aMatrix cellAtRow:10 column:0] setObjectValue:[NSString stringWithFormat:@"0x%X",[[settingsDict valueForKey:@"CAEN_triggerOutMask"] unsignedIntValue]]];
+    [[aMatrix cellAtRow:11 column:0] setObjectValue:[settingsDict valueForKey:@"CAEN_coincidenceLevel"]];
+    [[aMatrix cellAtRow:12 column:0] setObjectValue:[NSString stringWithFormat:@"%@",[[settingsDict valueForKey:@"CAEN_countAllTriggers"] boolValue]? @"YES":@"NO"]];
+    [[aMatrix cellAtRow:13 column:0] setObjectValue:[NSString stringWithFormat:@"%@",[[settingsDict valueForKey:@"CAEN_isCustomSize"] boolValue]? @"YES":@"NO"]];
+    [[aMatrix cellAtRow:14 column:0] setObjectValue:[settingsDict valueForKey:@"CAEN_eventSize"]];
+    [[aMatrix cellAtRow:15 column:0] setIntValue:[[settingsDict valueForKey:@"CAEN_customSize"] unsignedIntValue]*4];
+    [[aMatrix cellAtRow:16 column:0] setIntValue:[[settingsDict valueForKey:@"CAEN_postTriggerSetting"] unsignedIntValue]*4];
+    [[aMatrix cellAtRow:17 column:0] setObjectValue:[NSString stringWithFormat:@"0x%X",[[settingsDict valueForKey:@"CAEN_channelConfigMask"] unsignedShortValue]]];
+    [[aMatrix cellAtRow:18 column:0] setObjectValue:[settingsDict valueForKey:@"CAEN_acquisitionMode"]];
+    [[aMatrix cellAtRow:19 column:0] setObjectValue:[NSString stringWithFormat:@"0x%X",[[settingsDict valueForKey:@"CAEN_frontPanelControlMask"] unsignedIntValue]]];
+
+    [dacFormat release];
+}
+
+
+- (void) displayTUBiiSettings:(NSMutableDictionary*)settingsDict inMatrix:(NSMatrix*)aMatrix
+{
+
+    NSArray* objs = [[(ORAppDelegate*)[NSApp delegate] document] collectObjectsOfClass:NSClassFromString(@"TUBiiModel")];
+    TUBiiModel* tubiiModel;
+    if ([objs count]) {
+        tubiiModel = [objs objectAtIndex:0];
+    } else {
+        NSLogColor([NSColor redColor], @"couldn't find TUBii model. Please add it to the experiment and restart the run.\n");
+        return;
+    }
+
+    NSNumberFormatter *format = [[NSNumberFormatter alloc] init];
+    [format setFormat:@"#.###"];
+    [[aMatrix cellAtRow:0 column:0] setIntValue:[[settingsDict valueForKey:@"TUBii_TUBiiPGT_Rate"] intValue]]; //for formatting purposes
+    [[aMatrix cellAtRow:1 column:0] setObjectValue:[NSString stringWithFormat:@"0x%X",[[settingsDict valueForKey:@"TUBii_syncTrigMask"] unsignedIntValue]]];
+    [[aMatrix cellAtRow:2 column:0] setObjectValue:[NSString stringWithFormat:@"0x%X",[[settingsDict valueForKey:@"TUBii_asyncTrigMask"] unsignedIntValue]]];
+    [[aMatrix cellAtRow:3 column:0] setObjectValue:[NSString stringWithFormat:@"0x%X",[[settingsDict valueForKey:@"TUBii_CaenChannelMask"] unsignedIntValue]]];
+    [[aMatrix cellAtRow:4 column:0] setObjectValue:[NSString stringWithFormat:@"0x%X",[[settingsDict valueForKey:@"TUBii_CaenGainMask"] unsignedIntValue]]];
+    [[aMatrix cellAtRow:5 column:0] setObjectValue:[NSString stringWithFormat:@"0x%X",[[settingsDict valueForKey:@"TUBii_counterMask"] unsignedIntValue]]];
+    [[aMatrix cellAtRow:6 column:0] setObjectValue:[NSString stringWithFormat:@"0x%X",[[settingsDict valueForKey:@"TUBii_speakerMask"] unsignedIntValue]]];
+    [[aMatrix cellAtRow:7 column:0] setFloatValue:[tubiiModel MTCAMimic_BitsToVolts:[[settingsDict valueForKey:@"TUBii_MTCAMimic1_ThresholdInBits"] integerValue]]];
+    [[aMatrix cellAtRow:7 column:0] setFormatter:format];
+    [[aMatrix cellAtRow:8 column:0] setIntegerValue:[tubiiModel DGT_BitsToNanoSeconds:[[settingsDict valueForKey:@"TUBii_DGT_Bits"] integerValue]]];
+    [[aMatrix cellAtRow:9 column:0] setIntegerValue:[tubiiModel LODelay_BitsToNanoSeconds:[[settingsDict valueForKey:@"TUBii_LO_Bits"] integerValue]]];
+    [[aMatrix cellAtRow:10 column:0] setObjectValue:[NSString stringWithFormat:@"0x%X",[[settingsDict valueForKey:@"TUBii_controlReg"] unsignedIntValue]]];
+
 }
 
 - (IBAction) refreshStandardRunsAction:(id)sender

@@ -70,6 +70,10 @@
     IBOutlet NSMatrix *standardRunThresCurrentValues;
     IBOutlet NSMatrix *standardRunThresStoredValues;
     IBOutlet NSMatrix *standardRunThreshLabels;
+    IBOutlet NSMatrix *standardRunCAENDBMatrix;
+    IBOutlet NSMatrix *standardRunCAENCurrentMatrix;
+    IBOutlet NSMatrix *standardRunTUBiiDBMatrix;
+    IBOutlet NSMatrix *standardRunTUBiiCurrentMatrix;
 
     //Run Types Information
     IBOutlet NSMatrix*  runTypeWordMatrix;
