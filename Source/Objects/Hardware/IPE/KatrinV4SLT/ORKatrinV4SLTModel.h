@@ -24,21 +24,15 @@
 #import "ORIpeCard.h"
 #import "SBC_Linking.h"
 #import "SBC_Config.h"
-
-
-
-#import "ORIpeV4SLTModel.h"   //for kKatrinV4SLTNumRegs declaration - maybe not necessary in the future any more -tb- 2014
-
-
+#import "ORKatrinV4SLTRegisters.h"
 
 @class ORReadOutList;
 @class ORDataPacket;
 @class TimedWorker;
-@class ORIpeFLTModel;
 @class PMC_Link;
 @class SBC_Link;
 
-#define IsBitSet(A,B) (((A) & (B)) == (B))
+#define IsBitSet(A,B)       (((A) & (B)) == (B))
 #define ExtractValue(A,B,C) (((A) & (B)) >> (C))
 
 //control reg bit masks
@@ -47,15 +41,15 @@
 #define kCtrlPPSShift		10
 #define kCtrlTpEnEnShift	11
 
-#define kCtrlLedOffmask	(0x00000001 << 17) //RW
-#define kCtrlIntEnMask	(0x00000001 << 16) //RW
-#define kCtrlTstSltMask	(0x00000001 << 15) //RW
-#define kCtrlRunMask	(0x00000001 << 14) //RW
-#define kCtrlShapeMask	(0x00000001 << 13) //RW
-#define kCtrlTpEnMask	(0x00000003 << kCtrlTpEnEnShift)	//RW
-#define kCtrlPPSMask	(0x00000001 << kCtrlPPSShift)		//RW
-#define kCtrlInhEnMask	(0x0000000F <<  kCtrlInhEnShift)	//RW
-#define kCtrlTrgEnMask	(0x0000003F <<  kCtrlTrgEnShift)	//RW
+#define kCtrlLedOffmask	(0x00000001 << 17)               //RW
+#define kCtrlIntEnMask	(0x00000001 << 16)               //RW
+#define kCtrlTstSltMask	(0x00000001 << 15)               //RW
+#define kCtrlRunMask	(0x00000001 << 14)               //RW
+#define kCtrlShapeMask	(0x00000001 << 13)               //RW
+#define kCtrlTpEnMask	(0x00000003 << kCtrlTpEnEnShift) //RW
+#define kCtrlPPSMask	(0x00000001 << kCtrlPPSShift)    //RW
+#define kCtrlInhEnMask	(0x0000000F << kCtrlInhEnShift)	 //RW
+#define kCtrlTrgEnMask	(0x0000003F << kCtrlTrgEnShift)	 //RW
 
 //status reg bit masks
 #define kStatusIrq			(0x00000001 << 31) //R
@@ -122,10 +116,10 @@
 #define kPageMngResetShift			22
 #define kPageMngNumFreePagesShift	15
 #define kPageMngPgFullShift			14
-#define kPageMngNextPageShift		8
-#define kPageMngReadyShift			7
-#define kPageMngOldestPageShift	1
-#define kPageMngReleaseShift		0
+#define kPageMngNextPageShift		 8
+#define kPageMngReadyShift			 7
+#define kPageMngOldestPageShift      1
+#define kPageMngReleaseShift		 0
 
 #define kPageMngReset			(0x00000001 << kPageMngResetShift)			//W - self cleared
 #define kPageMngNumFreePages	(0x0000007F << kPageMngNumFreePagesShift)	//R
@@ -138,59 +132,6 @@
 //Trigger Timing
 #define kTrgTimingTrgWindow		(0x00000007 <<  16) //R/W
 #define kTrgEndPageDelay		(0x000007FF <<   0) //R/W
-
-//IPE V4 register definitions
-typedef enum KatrinSLTV4Enum {
-	kKatrinV4SLTControlReg,
-	kKatrinV4SLTStatusReg,
-	kKatrinV4SLTCommandReg,
-	kKatrinV4SLTInterruptReguestReg,
-	kKatrinV4SLTInterruptMaskReg,
-	kKatrinV4SLTRequestSemaphoreReg,
-	kKatrinV4SLTHWRevisionReg,
-	kKatrinV4SLTPixelBusErrorReg,
-	kKatrinV4SLTPixelBusEnableReg,
- 	kKatrinV4SLTVetoCounterHiReg,		//TODO: the LSB and MSB part of this SLT registers is confused (according to the SLT doc 2.13/2010-May) -tb-
-	kKatrinV4SLTVetoCounterLoReg,		//TODO: the LSB and MSB part of this SLT registers is confused (according to the SLT doc 2.13/2010-May) -tb-
-	kKatrinV4SLTDeadTimeCounterHiReg,	//TODO: the LSB and MSB part of this SLT registers is confused (according to the SLT doc 2.13/2010-May) -tb-
-	kKatrinV4SLTDeadTimeCounterLoReg,	//TODO: the LSB and MSB part of this SLT registers is confused (according to the SLT doc 2.13/2010-May) -tb-
-								//TODO: and dead time and veto time counter are confused, too -tb-
-	kKatrinV4SLTRunCounterHiReg,		//TODO: the LSB and MSB part of this SLT registers is confused (according to the SLT doc 2.13/2010-May) -tb-
-	kKatrinV4SLTRunCounterLoReg,		//TODO: the LSB and MSB part of this SLT registers is confused (according to the SLT doc 2.13/2010-May) -tb-
-    kKatrinV4SLTLostEventsCountReg, //new v10
-	kKatrinV4SLTSecondSetReg,
-	kKatrinV4SLTSecondCounterReg,
-	kKatrinV4SLTSubSecondCounterReg,
- 	kKatrinV4SLTPageSelectReg,
-	kKatrinV4SLTTPTimingReg,
-	kKatrinV4SLTTPShapeReg,
-	kKatrinV4SLTi2cCommandReg,
-	kKatrinV4SLTepcsCommandReg,
-	kKatrinV4SLTBoardIDLoReg,
-	kKatrinV4SLTBoardIDHiReg,
-	kKatrinV4SLTPROMsControlReg,
-	kKatrinV4SLTPROMsBufferReg,
-	kKatrinV4SLTDataFIFOReg,
-	kKatrinV4SLTFIFOModeReg,
-	kKatrinV4SLTFIFOStatusReg,
-	kKatrinV4SLTPAEOffsetReg,
-	kKatrinV4SLTPAFOffsetReg,
-	kKatrinV4SLTFIFOCsrReg,
-	kKatrinV4SLTFIFOxRequestReg,
-	kKatrinV4SLTFIFOMaskReg,
-	kKatrinV4SLTNumRegs //must be last
-} KatrinSLTV4Enum;
-
-typedef struct KatrinV4SLTRegisterNamesStruct {
-    NSString*       regName;
-    unsigned long 	addressOffset;
-    int				length;
-    short			accessType;
-    KatrinSLTV4Enum enumCheckValue;
-} KatrinV4SLTRegisterNamesStruct;
-
-
-extern KatrinV4SLTRegisterNamesStruct regKatrinSLTV4[kKatrinV4SLTNumRegs];
 
 
 @interface ORKatrinV4SLTModel : ORIpeCard <ORDataTaker,SBC_Linking>
@@ -237,7 +178,7 @@ extern KatrinV4SLTRegisterNamesStruct regKatrinSLTV4[kKatrinV4SLTNumRegs];
         NSString*   sltScriptArguments;
         BOOL        secondsSetInitWithHost;
         bool        secondsSetSendToFLTs;
-        uint32_t    pixelBusEnableReg;
+        unsigned long    pixelBusEnableReg;
 }
 
 #pragma mark •••Initialization
@@ -246,7 +187,6 @@ extern KatrinV4SLTRegisterNamesStruct regKatrinSLTV4[kKatrinV4SLTNumRegs];
 - (void) setUpImage;
 - (void) makeMainController;
 - (void) setGuardian:(id)aGuardian;
-- (BOOL) checkRegisterStruct;
 
 #pragma mark •••Notifications
 - (void) registerNotificationObservers;
@@ -254,8 +194,8 @@ extern KatrinV4SLTRegisterNamesStruct regKatrinSLTV4[kKatrinV4SLTNumRegs];
 - (void) runIsStartingSubRun:(NSNotification*)aNote;
 
 #pragma mark •••Accessors
-- (uint32_t) pixelBusEnableReg;
-- (void) setPixelBusEnableReg:(uint32_t)aPixelBusEnableReg;
+- (unsigned long) pixelBusEnableReg;
+- (void) setPixelBusEnableReg:(unsigned long)aPixelBusEnableReg;
 - (bool) secondsSetSendToFLTs;
 - (void) setSecondsSetSendToFLTs:(bool)aSecondsSetSendToFLTs;
 - (BOOL) secondsSetInitWithHost;
@@ -365,7 +305,6 @@ extern KatrinV4SLTRegisterNamesStruct regKatrinSLTV4[kKatrinV4SLTNumRegs];
 - (void)		writeFIFOcsrReset;
 
 - (unsigned long long) readBoardID;
-- (void) readEventStatus:(unsigned long*)eventStatusBuffer;
 
 - (void)		  writePageSelect:(unsigned long)aPageNum;
 - (void)		  writeInterruptMask;

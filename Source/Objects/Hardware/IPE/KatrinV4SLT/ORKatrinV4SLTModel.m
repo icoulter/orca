@@ -36,44 +36,6 @@
 #import "ORTaskSequence.h"
 #import "ORFileMover.h"
 
-KatrinV4SLTRegisterNamesStruct regKatrinSLTV4[kKatrinV4SLTNumRegs] = {
-{@"Control",			0xa80000,	1,		kIpeRegReadable | kIpeRegWriteable, kKatrinV4SLTControlReg          },
-{@"Status",				0xa80004,	1,		kIpeRegReadable | kIpeRegWriteable, kKatrinV4SLTStatusReg           },
-{@"Command",			0xa80008,	1,		kIpeRegWriteable,                   kKatrinV4SLTCommandReg          },
-{@"Interrupt Reguest",	0xA8000C,	1,		kIpeRegReadable,                    kKatrinV4SLTInterruptReguestReg },
-{@"Interrupt Mask",		0xA80010,	1,		kIpeRegReadable | kIpeRegWriteable, kKatrinV4SLTInterruptMaskReg    },
-{@"Request Semaphore",	0xA80014,	3,		kIpeRegReadable,                    kKatrinV4SLTRequestSemaphoreReg },
-{@"HWRevision",			0xa80020,	1,		kIpeRegReadable,                    kKatrinV4SLTHWRevisionReg       },
-{@"Pixel Bus Error",	0xA80024,	1,		kIpeRegReadable,                    kKatrinV4SLTPixelBusErrorReg    },
-{@"Pixel Bus Enable",	0xA80028,	1, 		kIpeRegReadable | kIpeRegWriteable, kKatrinV4SLTPixelBusEnableReg   },
-{@"Veto Counter (MSB)",	0xA80080, 	1,		kIpeRegReadable,                    kKatrinV4SLTVetoCounterHiReg    },
-{@"Veto Counter (LSB)",	0xA80084,	1,		kIpeRegReadable,                    kKatrinV4SLTVetoCounterLoReg    },
-{@"Dead Counter (MSB)",	0xA80088, 	1,		kIpeRegReadable,                    kKatrinV4SLTDeadTimeCounterHiReg},
-{@"Dead Counter (LSB)",	0xA8008C, 	1,		kIpeRegReadable,                    kKatrinV4SLTDeadTimeCounterLoReg},
-{@"Run Counter  (MSB)",	0xA80090,	1,		kIpeRegReadable,                    kKatrinV4SLTRunCounterHiReg     },
-{@"Run Counter  (LSB)",	0xA80094, 	1,		kIpeRegReadable,                    kKatrinV4SLTRunCounterLoReg     },
-{@"Lost Events",        0xa80098,   1,      kIpeRegReadable,                    kKatrinV4SLTLostEventsCountReg  },
-{@"Second Set",			0xB00000,  	1, 		kIpeRegReadable | kIpeRegWriteable, kKatrinV4SLTSecondSetReg        },
-{@"Second Counter",		0xB00004, 	1,		kIpeRegReadable,                    kKatrinV4SLTSecondCounterReg    },
-{@"Sub-second Counter",	0xB00008, 	1,		kIpeRegReadable,                    kKatrinV4SLTSubSecondCounterReg },
-{@"Page Select",		0xB80008, 	1,		kIpeRegReadable,                    kKatrinV4SLTPageSelectReg       },
-{@"TP Timing",			0xC80000,   128,	kIpeRegReadable | kIpeRegWriteable, kKatrinV4SLTTPTimingReg         },
-{@"TP Shape",			0xC81000,   512,	kIpeRegReadable | kIpeRegWriteable, kKatrinV4SLTTPShapeReg          },
-{@"I2C Command",		0xC00000,	1,		kIpeRegReadable,                    kKatrinV4SLTi2cCommandReg       },
-{@"EPC Command",		0xC00004,	1,		kIpeRegReadable | kIpeRegWriteable, kKatrinV4SLTepcsCommandReg      },
-{@"Board ID (LSB)",		0xC00008,	1,		kIpeRegReadable,                    kKatrinV4SLTBoardIDLoReg        },
-{@"Board ID (MSB)",		0xC0000C,	1,		kIpeRegReadable,                    kKatrinV4SLTBoardIDHiReg        },
-{@"PROMs Control",		0xC00010,	1,		kIpeRegReadable | kIpeRegWriteable, kKatrinV4SLTPROMsControlReg     },
-{@"PROMs Buffer",		0xC00100,	256,	kIpeRegReadable | kIpeRegWriteable, kKatrinV4SLTPROMsBufferReg      },
-{@"DataFIFO",		    0xD00000,   0x10000,kIpeRegReadable | kIpeRegWriteable, kKatrinV4SLTDataFIFOReg         },
-{@"FIFO Mode",			0xE00000,   1,	    kIpeRegReadable | kIpeRegWriteable, kKatrinV4SLTFIFOModeReg         },
-{@"FIFO Status",		0xE00004,   1,	    kIpeRegReadable | kIpeRegWriteable, kKatrinV4SLTFIFOStatusReg       },
-{@"PAE Offset",		    0xE00008,   1,	    kIpeRegReadable | kIpeRegWriteable, kKatrinV4SLTPAEOffsetReg        },
-{@"PAF Offset",		    0xE0000C,   1,	    kIpeRegReadable | kIpeRegWriteable, kKatrinV4SLTPAFOffsetReg        },
-{@"FIFO Csr",		    0xE00010,   1,	    kIpeRegReadable | kIpeRegWriteable, kKatrinV4SLTFIFOCsrReg          },
-{@"FIFOx Request",		0xE00014,   1,	    kIpeRegReadable | kIpeRegWriteable, kKatrinV4SLTFIFOxRequestReg     },
-{@"FIFO Mask",		    0xE00018,   1,	    kIpeRegReadable | kIpeRegWriteable, kKatrinV4SLTFIFOMaskReg         },
-};
 
 #pragma mark ***Notification Strings
 NSString* ORKatrinV4SLTModelPixelBusEnableRegChanged        = @"ORKatrinV4SLTModelPixelBusEnableRegChanged";
@@ -177,19 +139,6 @@ NSString* ORKatrinV4SLTcpuLock                              = @"ORKatrinV4SLTcpu
 	}
 }
 
-- (BOOL) checkRegisterStruct
-{
-    //used to double-check the register structure against the enum list
-    int i;
-    BOOL structOK = YES;
-    for(i=0;i<kKatrinV4SLTNumRegs;i++){
-        if(regKatrinSLTV4[i].enumCheckValue != i){
-            structOK = NO;
-        }
-    }
-    return structOK;
-}
-
 - (void) setUpImage			{ [self setImage:[NSImage imageNamed:@"KatrinV4SLTCard"]];  }
 - (void) makeMainController	{ [self linkToController:@"ORKatrinV4SLTController"];		}
 - (Class) guardianClass		{ return NSClassFromString(@"ORIpeV4CrateModel");           }
@@ -227,12 +176,12 @@ NSString* ORKatrinV4SLTcpuLock                              = @"ORKatrinV4SLTcpu
 
 #pragma mark •••Accessors
 
-- (uint32_t) pixelBusEnableReg
+- (unsigned long) pixelBusEnableReg
 {
     return pixelBusEnableReg;
 }
 
-- (void) setPixelBusEnableReg:(uint32_t)aPixelBusEnableReg
+- (void) setPixelBusEnableReg:(unsigned long)aPixelBusEnableReg
 {
     [[[self undoManager] prepareWithInvocationTarget:self] setPixelBusEnableReg:pixelBusEnableReg];
     pixelBusEnableReg = aPixelBusEnableReg;
@@ -398,32 +347,29 @@ NSString* ORKatrinV4SLTcpuLock                              = @"ORKatrinV4SLTcpu
     [[NSNotificationCenter defaultCenter] postNotificationName:ORKatrinV4SLTModelHwVersionChanged object:self];	
 }
 
+- (void) writeSetInhibit		{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdSetInh];          }
+- (void) writeClrInhibit		{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdClrInh];          }
+- (void) writeSwTrigger			{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdSwTr];            }
+- (void) writeTpStart			{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdTpStart];         }
+- (void) writeFwCfg				{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdFwCfg];           }
+- (void) writeSltReset			{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdSltReset];        }
+- (void) writeFltReset			{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdFltReset];        }
+- (void) writeSwRq				{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdSwRq];            }
+- (void) writeClrCnt			{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdClrCnt];          }
+- (void) writeEnCnt				{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdEnCnt];           }
+- (void) writeDisCnt			{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdDisCnt];          }
+- (void) clearAllStatusErrorBits{ [self writeReg:kKatrinV4SLTStatusReg  value:kStatusClearAllMask]; }
+- (void) writeFIFOcsrReset      { [self writeReg:kKatrinV4SLTFIFOCsrReg value:kFIFOcsrResetMask];   }
+
 - (void) writePageSelect:(unsigned long)aPageNum		{
     //NSLog(@"WARNING: you called %@::%@ - this is a Auger register and is of no use for KATRIN - access rejected!\n",NSStringFromClass([self class]),NSStringFromSelector(_cmd));//DEBUG -tb-
-    [self writeReg:kKatrinV4SLTPageSelectReg value:aPageNum]; 
 }
-- (void) writeSetInhibit		{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdSetInh]; }
-- (void) writeClrInhibit		{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdClrInh]; }
-- (void) writeSwTrigger			{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdSwTr];   }
-- (void) writeTpStart			{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdTpStart];   }
-- (void) writeFwCfg				{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdFwCfg];   }
-- (void) writeSltReset			{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdSltReset];   }
-- (void) writeFltReset			{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdFltReset];   }
-- (void) writeSwRq				{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdSwRq];   }
-- (void) writeClrCnt			{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdClrCnt];   }
-- (void) writeEnCnt				{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdEnCnt];   }
-- (void) writeDisCnt			{ [self writeReg:kKatrinV4SLTCommandReg value:kCmdDisCnt];   }
 - (void) writeReleasePage		{
     NSLog(@"WARNING: you called %@::%@ - this is a Auger register and is of no use for KATRIN - access rejected!\n",NSStringFromClass([self class]),NSStringFromSelector(_cmd));//DEBUG -tb-
-    //[self writeReg:kKatrinV4SLTPageManagerReg value:kPageMngRelease];
 }
 - (void) writePageManagerReset	{
     NSLog(@"WARNING: you called %@::%@ - this is a Auger register and is of no use for KATRIN - access rejected!\n",NSStringFromClass([self class]),NSStringFromSelector(_cmd));//DEBUG -tb-
-    //[self writeReg:kKatrinV4SLTPageManagerReg value:kPageMngReset];   
 }
-- (void) clearAllStatusErrorBits{ [self writeReg:kKatrinV4SLTStatusReg value:kStatusClearAllMask];   }
-
-- (void) writeFIFOcsrReset{ [self writeReg:kKatrinV4SLTFIFOCsrReg value:kFIFOcsrResetMask];   }
 
 
 - (id) controllerCard		{ return self;	  }
@@ -578,17 +524,17 @@ NSString* ORKatrinV4SLTcpuLock                              = @"ORKatrinV4SLTcpu
 
 - (NSString*) getRegisterName: (short) anIndex
 {
-    return regKatrinSLTV4[anIndex].regName;
+    return [katrinV4SLTRegisters registerName:anIndex];
 }
 
 - (unsigned long) getAddress: (short) anIndex
 {
-    return( regKatrinSLTV4[anIndex].addressOffset>>2);
+    return [katrinV4SLTRegisters address:anIndex];
 }
 
 - (short) getAccessType: (short) anIndex
 {
-	return regKatrinSLTV4[anIndex].accessType;
+	return [katrinV4SLTRegisters accessType:anIndex];
 }
 
 - (unsigned short) selectedRegIndex
@@ -727,6 +673,7 @@ NSString* ORKatrinV4SLTcpuLock                              = @"ORKatrinV4SLTcpu
     [driverScriptFileMover doNotMoveFilesToSentFolder];
     [driverScriptFileMover setTransferType:eUseSCP];
     [aSequence addTaskObj:driverScriptFileMover];
+    [driverScriptFileMover release];
     
     //NSString* scriptRunPath = [NSString stringWithFormat:@"/home/%@/%@",[pmcLink userName],scriptName];
     NSString* scriptRunPath = [NSString stringWithFormat:@"~/%@",scriptName];
@@ -906,9 +853,7 @@ NSString* ORKatrinV4SLTcpuLock                              = @"ORKatrinV4SLTcpu
 - (void) readAllStatus
 {
 	//[self readControlReg];
-	//[self readPageSelectReg]; removed 2013-11; this was a Auger register without any use for KATRIN -tb-
 	[self readStatusReg];
-	//[self readReadOutControlReg];
 	[self readDeadTime];
 	[self readVetoTime];
 	[self readRunTime];
@@ -996,7 +941,7 @@ NSString* ORKatrinV4SLTcpuLock                              = @"ORKatrinV4SLTcpu
 
 - (void) setHostTimeToFLTsAndSLT
 {
-    uint32_t args[2];
+    unsigned long args[2];
 	args[0] = 0; //flags
         if(secondsSetInitWithHost)  args[0] |= kSecondsSetInitWithHostFlag;
         if(secondsSetSendToFLTs)    args[0] |= kSecondsSetSendToFLTsFlag;
@@ -1006,26 +951,7 @@ NSString* ORKatrinV4SLTcpuLock                              = @"ORKatrinV4SLTcpu
 	}
 	else {
 		[pmcLink writeGeneral:(long*)&args operation:kSetHostTimeToFLTsAndSLT numToWrite:2];
-		//[pmcLink writeGeneral:&args operation:kSetHostTimeToFLTsAndSLT numToWrite:2];
-            //WARNING:
-            //this produced a compiler warning; I did NOT remove it to not forget that we expect uint32_t on the SBCs
-            //in Orca, sizeof(long) is 4 byte; SBCs may be 64 bit machines -> sizeof(long) is 8 byte!  -tb- 2012-12
 	}
-}
-
-
-- (void) readEventStatus:(unsigned long*)eventStatusBuffer
-{
-    NSLog(@"WARNING: you called %@::%@ - this is a Auger register and is of no use for KATRIN - access rejected!\n",NSStringFromClass([self class]),NSStringFromSelector(_cmd));//DEBUG -tb-
-/*
-	if(![pmcLink isConnected]){
-		[NSException raise:@"Not Connected" format:@"Socket not connected."];
-	}
-	[pmcLink readLongBlockPmc:eventStatusBuffer
-					 atAddress:regKatrinSLTV4[kKatrinV4SLTEventStatusReg].addressOffset
-					 numToRead: 3];
-	
-*/
 }
 
 - (unsigned long long) readBoardID
@@ -1294,8 +1220,8 @@ return;
 
 - (void) initBoard
 {
-    if(countersEnabled)[self writeEnCnt];
-    else [self writeDisCnt];
+    if(countersEnabled) [self writeEnCnt];
+    else                [self writeDisCnt];
     
 	if(countersEnabled  && !(controlReg & (0x1 << kCtrlInhEnShift))  ){
 		NSLogColor([NSColor redColor],@"WARNING: KATRIN-DAQ SLTv4: you used 'Counters Enabled' but 'Inhibits Enabled SW' is not set!\n");//TODO: maybe popup Orca Alarm window? -tb-
@@ -1379,6 +1305,7 @@ return;
 	//[self writeReg:kSltSwSltTrigger value:0];
 	//[self writeReg:kSltSwSetInhibit value:0];				
 }
+
 /*
 - (void) loadPulseAmp
 {
@@ -1399,7 +1326,6 @@ return;
 	for (i=2;i<256;i++) [self write:SLT_REG_ADDRESS(kSltTestpulsTiming)+i value:theConvertedDelay];
 }
 
-
 - (void) loadPulserValues
 {
 	[self loadPulseAmp];
@@ -1418,48 +1344,44 @@ return;
 	self = [super initWithCoder:decoder];
 	[[self undoManager] disableUndoRegistration];
 	
-	[self setPixelBusEnableReg:[decoder decodeIntForKey:@"pixelBusEnableReg"]];
-	[self setSltScriptArguments:[decoder decodeObjectForKey:@"sltScriptArguments"]];
-	pmcLink = [[decoder decodeObjectForKey:@"PMC_Link"] retain];
-	if(!pmcLink)pmcLink = [[PMC_Link alloc] initWithDelegate:self];
-	else [pmcLink setDelegate:self];
+    pmcLink = [[decoder decodeObjectForKey:@"PMC_Link"] retain];
+    if(!pmcLink)pmcLink = [[PMC_Link alloc] initWithDelegate:self];
+    else                  [pmcLink setDelegate:self];
 
-	[self setControlReg:		[decoder decodeInt32ForKey:@"controlReg"]];
-	[self setSecondsSet:		[decoder decodeInt32ForKey:@"secondsSet"]];
-	if([decoder containsValueForKey:@"secondsSetInitWithHost"])
-		[self setSecondsSetInitWithHost:[decoder decodeBoolForKey:@"secondsSetInitWithHost"]];
-	else[self setSecondsSetInitWithHost: YES];
-	[self setSecondsSetSendToFLTs:[decoder decodeBoolForKey:@"secondsSetSendToFLTs"]];
-	
-	[self setCountersEnabled:	[decoder decodeBoolForKey:@"countersEnabled"]];
-
-	//status reg
+    
+	[self setPixelBusEnableReg:     [decoder decodeIntForKey:@"pixelBusEnableReg"]];
+	[self setSltScriptArguments:    [decoder decodeObjectForKey:@"sltScriptArguments"]];
+	[self setControlReg:            [decoder decodeInt32ForKey:@"controlReg"]];
+	[self setSecondsSet:            [decoder decodeInt32ForKey:@"secondsSet"]];
+	[self setSecondsSetSendToFLTs:  [decoder decodeBoolForKey:@"secondsSetSendToFLTs"]];
+	[self setCountersEnabled:       [decoder decodeBoolForKey:@"countersEnabled"]];
 	[self setPatternFilePath:		[decoder decodeObjectForKey:@"ORKatrinV4SLTModelPatternFilePath"]];
 	[self setInterruptMask:			[decoder decodeInt32ForKey:@"ORKatrinV4SLTModelInterruptMask"]];
 	[self setPulserDelay:			[decoder decodeFloatForKey:@"ORKatrinV4SLTModelPulserDelay"]];
 	[self setPulserAmp:				[decoder decodeFloatForKey:@"ORKatrinV4SLTModelPulserAmp"]];
-		
-	//special
     [self setNextPageDelay:			[decoder decodeIntForKey:@"nextPageDelay"]]; // ak, 5.10.07
-	
 	[self setReadOutGroup:			[decoder decodeObjectForKey:@"ReadoutGroup"]];
     [self setPoller:				[decoder decodeObjectForKey:@"poller"]];
-	
     [self setPageSize:				[decoder decodeIntForKey:@"ORKatrinV4SLTPageSize"]]; // ak, 9.12.07
     [self setDisplayTrigger:		[decoder decodeBoolForKey:@"ORKatrinV4SLTDisplayTrigger"]];
     [self setDisplayEventLoop:		[decoder decodeBoolForKey:@"ORKatrinV4SLTDisplayEventLoop"]];
-    	
-    if (!poller)[self makePoller:0];
+    
 	
-	//needed because the readoutgroup was added when the object was already in the config and so might not be in the configuration
+	//These were added when the object was already in the config and so might not availale if old config is read
+    if([decoder containsValueForKey:@"secondsSetInitWithHost"]){
+        [self setSecondsSetInitWithHost:[decoder decodeBoolForKey:@"secondsSetInitWithHost"]];
+    }
+    else [self setSecondsSetInitWithHost: YES];
 	if(!readOutGroup){
 		ORReadOutList* readList = [[ORReadOutList alloc] initWithIdentifier:@"ReadOut List"];
 		[self setReadOutGroup:readList];
 		[readList release];
 	}
 	
-	[[self undoManager] enableUndoRegistration];
+    if (!poller)[self makePoller:0];
 
+	[[self undoManager] enableUndoRegistration];
+    
 	[self registerNotificationObservers];
 		
 	return self;
@@ -1469,30 +1391,24 @@ return;
 {
 	[super encodeWithCoder:encoder];
 	
-	[encoder encodeInt:pixelBusEnableReg forKey:@"pixelBusEnableReg"];
-	[encoder encodeBool:secondsSetSendToFLTs forKey:@"secondsSetSendToFLTs"];
-	[encoder encodeBool:secondsSetInitWithHost forKey:@"secondsSetInitWithHost"];
-	[encoder encodeObject:sltScriptArguments forKey:@"sltScriptArguments"];
-	[encoder encodeBool:countersEnabled forKey:@"countersEnabled"];
-	[encoder encodeInt32:secondsSet forKey:@"secondsSet"];
-	[encoder encodeObject:pmcLink		forKey:@"PMC_Link"];
-	[encoder encodeInt32:controlReg	forKey:@"controlReg"];
-	
-	//status reg
-	[encoder encodeObject:patternFilePath forKey:@"ORKatrinV4SLTModelPatternFilePath"];
-	[encoder encodeInt32:interruptMask	 forKey:@"ORKatrinV4SLTModelInterruptMask"];
-	[encoder encodeFloat:pulserDelay	 forKey:@"ORKatrinV4SLTModelPulserDelay"];
-	[encoder encodeFloat:pulserAmp		 forKey:@"ORKatrinV4SLTModelPulserAmp"];
-		
-	//special
-    [encoder encodeInt:nextPageDelay     forKey:@"nextPageDelay"]; // ak, 5.10.07
-	
-	[encoder encodeObject:readOutGroup  forKey:@"ReadoutGroup"];
-    [encoder encodeObject:poller         forKey:@"poller"];
-	
-    [encoder encodeInt:pageSize         forKey:@"ORKatrinV4SLTPageSize"]; // ak, 9.12.07
-    [encoder encodeBool:displayTrigger   forKey:@"ORKatrinV4SLTDisplayTrigger"];
-    [encoder encodeBool:displayEventLoop forKey:@"ORKatrinV4SLTDisplayEventLoop"];
+	[encoder encodeInt:pixelBusEnableReg        forKey:@"pixelBusEnableReg"];
+	[encoder encodeBool:secondsSetSendToFLTs    forKey:@"secondsSetSendToFLTs"];
+	[encoder encodeBool:secondsSetInitWithHost  forKey:@"secondsSetInitWithHost"];
+	[encoder encodeObject:sltScriptArguments    forKey:@"sltScriptArguments"];
+	[encoder encodeBool:countersEnabled         forKey:@"countersEnabled"];
+	[encoder encodeInt32:secondsSet             forKey:@"secondsSet"];
+	[encoder encodeObject:pmcLink               forKey:@"PMC_Link"];
+	[encoder encodeInt32:controlReg             forKey:@"controlReg"];
+	[encoder encodeObject:patternFilePath       forKey:@"ORKatrinV4SLTModelPatternFilePath"];
+	[encoder encodeInt32:interruptMask          forKey:@"ORKatrinV4SLTModelInterruptMask"];
+	[encoder encodeFloat:pulserDelay            forKey:@"ORKatrinV4SLTModelPulserDelay"];
+	[encoder encodeFloat:pulserAmp              forKey:@"ORKatrinV4SLTModelPulserAmp"];
+    [encoder encodeInt:nextPageDelay            forKey:@"nextPageDelay"];
+	[encoder encodeObject:readOutGroup          forKey:@"ReadoutGroup"];
+    [encoder encodeObject:poller                forKey:@"poller"];
+    [encoder encodeInt:pageSize                 forKey:@"ORKatrinV4SLTPageSize"];
+    [encoder encodeBool:displayTrigger          forKey:@"ORKatrinV4SLTDisplayTrigger"];
+    [encoder encodeBool:displayEventLoop        forKey:@"ORKatrinV4SLTDisplayEventLoop"];
 		
 }
 
@@ -1501,7 +1417,7 @@ return;
     NSMutableDictionary* dataDictionary = [NSMutableDictionary dictionary];
 	
     NSDictionary* aDictionary = [NSDictionary dictionaryWithObjectsAndKeys:
-								 @"ORKatrinV4SLTDecoderForEvent",			@"decoder",
+								 @"ORKatrinV4SLTDecoderForEvent",		@"decoder",
 								 [NSNumber numberWithLong:eventDataId],	@"dataId",
 								 [NSNumber numberWithBool:NO],			@"variable",
 								 [NSNumber numberWithLong:5],			@"length",
@@ -1510,7 +1426,7 @@ return;
     [dataDictionary setObject:aDictionary forKey:@"KatrinV4SLTEvent"];
 	
     aDictionary = [NSDictionary dictionaryWithObjectsAndKeys:
-				   @"ORKatrinV4SLTDecoderForMultiplicity",			@"decoder",
+				   @"ORKatrinV4SLTDecoderForMultiplicity",		@"decoder",
 				   [NSNumber numberWithLong:multiplicityId],    @"dataId",
 				   [NSNumber numberWithBool:NO],				@"variable",
 				   [NSNumber numberWithLong:3+20*100],			@"length",
@@ -1539,15 +1455,14 @@ return;
     return dataDictionary;
 }
 
-- (unsigned long) eventDataId        { return eventDataId; }
-- (unsigned long) multiplicityId	 { return multiplicityId; }
-- (unsigned long) eventFifoId	 { return eventFifoId; }
-- (void) setEventDataId: (unsigned long) aDataId    { eventDataId = aDataId; }
+- (unsigned long) eventDataId                       { return eventDataId; }
+- (unsigned long) multiplicityId                    { return multiplicityId; }
+- (unsigned long) eventFifoId                       { return eventFifoId; }
+- (unsigned long) energyId                          { return energyId; }
+- (void) setEventDataId:    (unsigned long) aDataId { eventDataId = aDataId; }
 - (void) setMultiplicityId: (unsigned long) aDataId { multiplicityId = aDataId; }
-- (void) setEventFifoId: (unsigned long) aDataId { eventFifoId = aDataId; }
-
-- (unsigned long) energyId        { return energyId; }
-- (void) setEnergyId: (unsigned long) aDataId { energyId = aDataId; }
+- (void) setEventFifoId:    (unsigned long) aDataId { eventFifoId = aDataId; }
+- (void) setEnergyId:       (unsigned long) aDataId { energyId = aDataId; }
 
 - (void) setDataIds:(id)assigner
 {
@@ -1573,15 +1488,15 @@ return;
 	[objDictionary setObject:[NSNumber numberWithLong:controlReg]				    forKey:@"ControlReg"];
 	[objDictionary setObject:[NSNumber numberWithInt:countersEnabled]				forKey:@"CountersEnabled"];
 	[objDictionary setObject:[NSNumber numberWithInt:secondsSetInitWithHost]		forKey:@"SecondsSetInitWithHost"];
-	if(!secondsSetInitWithHost) [objDictionary setObject:[NSNumber numberWithLong:secondsSet]				    forKey:@"SecondsInitializeTo"];
+	if(!secondsSetInitWithHost) [objDictionary setObject:[NSNumber numberWithLong:secondsSet] forKey:@"SecondsInitializeTo"];
 	[objDictionary setObject:[NSNumber numberWithInt:secondsSetSendToFLTs]		    forKey:@"SecondsUseForFLTs"];
     //this is accessing the hardware and might fail
 	@try {
-	    [objDictionary setObject:[NSNumber numberWithUnsignedLong:[self readHwVersion]]		forKey:@"FPGAVersion"];
-	    [objDictionary setObject:[NSString stringWithFormat:@"0x%08lx",[self readHwVersion]]		forKey:@"FPGAVersionString"];
-	    [objDictionary setObject:[NSNumber numberWithLong:[self getSBCCodeVersion]]		forKey:@"SBCCodeVersion"];
-	    [objDictionary setObject:[NSNumber numberWithLong:[self getSltPciDriverVersion]]		forKey:@"SLTDriverVersion"];
-	    [objDictionary setObject:[NSNumber numberWithLong:[self getSltkGetIsLinkedWithPCIDMALib]]		forKey:@"LinkedWithDMALib"];
+	    [objDictionary setObject:[NSNumber numberWithUnsignedLong:[self readHwVersion]]           forKey:@"FPGAVersion"];
+	    [objDictionary setObject:[NSString stringWithFormat:@"0x%08lx",[self readHwVersion]]      forKey:@"FPGAVersionString"];
+	    [objDictionary setObject:[NSNumber numberWithLong:[self getSBCCodeVersion]]               forKey:@"SBCCodeVersion"];
+	    [objDictionary setObject:[NSNumber numberWithLong:[self getSltPciDriverVersion]]          forKey:@"SLTDriverVersion"];
+	    [objDictionary setObject:[NSNumber numberWithLong:[self getSltkGetIsLinkedWithPCIDMALib]] forKey:@"LinkedWithDMALib"];
 	}
 	@catch (NSException* e){
 	}
@@ -1590,7 +1505,6 @@ return;
 }
 
 #pragma mark •••Data Taker
-
 - (void) runTaskStarted:(ORDataPacket*)aDataPacket userInfo:(id)userInfo
 {
     [self setIsPartOfRun: YES];
@@ -1625,7 +1539,7 @@ return;
             if(runMode == kIpeFltV4_Histogram_DaqMode) countHistoMode++; else countNonHistoMode++;
         }
         if([obj respondsToSelector:@selector(useBipolarEnergy)]){
-            runMode=[obj useBipolarEnergy];
+            //runMode=[obj useBipolarEnergy];
             if([obj useBipolarEnergy]) countBipolarEnergyMode++;
         }
         
@@ -1711,31 +1625,26 @@ return;
 
 -(void) takeData:(ORDataPacket*)aDataPacket userInfo:(id)userInfo
 {
-	if(!first){
-		//event readout controlled by the SLT cpu now. ORCA reads out 
-		//the resulting data from a generic circular buffer in the pmc code.
-		[pmcLink takeData:aDataPacket userInfo:userInfo];
-	}
-	else {// the first time
+	if(first){
 		//TODO: -tb- [self writePageManagerReset];
 		//TODO: -tb- [self writeClrCnt];
-        
-        //DEBUG         [self dumpSltSecondCounter:@"SLT-takeData-vor RelInhibit:"];
         
 		unsigned long long runcount = [self readRunTime];
 		[self shipSltEvent:kRunCounterType withType:kStartRunType eventCt:0 high: (runcount>>32)&0xffffffff low:(runcount)&0xffffffff ];
 		[self writeClrInhibit]; //TODO: maybe move to readout loop to avoid dead time -tb-
 
-        //DEBUG         [self dumpSltSecondCounter:@"SLT-takeData-nach RelInhibit:"];
-
 		[self shipSltSecondCounter: kStartRunType];
 		first = NO;
 	}
+    else {
+        //event readout controlled by the SLT cpu now. ORCA reads out
+        //the resulting data from a generic circular buffer in the pmc code.
+        [pmcLink takeData:aDataPacket userInfo:userInfo];
+    }
 }
 
 - (void) runIsStopping:(ORDataPacket*)aDataPacket userInfo:(id)userInfo
 {
-
     for(id obj in dataTakers){
         [obj runIsStopping:aDataPacket userInfo:userInfo];
     }
@@ -1765,17 +1674,14 @@ return;
 	dataTakers = nil;
 
     [self setIsPartOfRun: NO];
-
 }
 
 - (void) dumpSltSecondCounter:(NSString*)text
 {
 	unsigned long subseconds = [self readSubSecondsCounter];
 	unsigned long seconds = [self readSecondsCounter];
-    if(text)
-        NSLog(@"%@::%@   %@   sec:%i  subsec:%i\n",NSStringFromClass([self class]),NSStringFromSelector(_cmd),text,seconds,subseconds);//DEBUG -tb-
-    else
-        NSLog(@"%@::%@    sec:%i  subsec:%i\n",NSStringFromClass([self class]),NSStringFromSelector(_cmd),seconds,subseconds);//DEBUG -tb-
+    if(text) NSLog(@"%@::%@   %@   sec:%i  subsec:%i\n",NSStringFromClass([self class]),NSStringFromSelector(_cmd),text,seconds,subseconds);//DEBUG -tb-
+    else     NSLog(@"%@::%@    sec:%i  subsec:%i\n",NSStringFromClass([self class]),NSStringFromSelector(_cmd),seconds,subseconds);//DEBUG -tb-
 }
 
 /** For the V4 SLT (Auger/KATRIN)the subseconds count 100 nsec tics! (Despite the fact that the ADC sampling has a 50 nsec base.)
@@ -1819,7 +1725,6 @@ return;
 	int i, j, k;
 	int sltSize = pageSize * 20;	
 	
-	
 	// Dislay the matrix of triggered pixel and timing
 	// The xy-Projection is needed to readout only the triggered pixel!!!
 	//unsigned long xyProj[20];
@@ -1841,7 +1746,6 @@ return;
 			if (((xyProj[i]>>j) & 0x1 ) == 0x1) nTriggered++;
 		}
 	}
-	
 	
 	// Display trigger data
 	if (displayTrigger) {	

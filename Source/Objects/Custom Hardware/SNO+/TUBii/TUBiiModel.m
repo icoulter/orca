@@ -182,31 +182,13 @@ NSString* ORTubiiSettingsChangedNotification    = @"ORTubiiSettingsChangedNotifi
 }
 
 #pragma mark •••Network Communication
-- (void) sendOkCmd:(NSString* const)aCmd {
-    [self sendOkCmd:aCmd print:YES];
-}
-- (void) sendOkCmd:(NSString* const)aCmd print:(BOOL)printCheck{
-    @try {
-        if(printCheck){
-            NSLog(@"Sending %@ to TUBii\n",aCmd);
-        }
-        [connection okCommand: [aCmd UTF8String]];
-    }
-    @catch (NSException *exception) {
-        if(printCheck){
-            NSLogColor([NSColor redColor],@"Command: %@ failed.  Reason: %@\n", aCmd,[exception reason]);
-        }
-    }
+- (void) sendOkCmd:(NSString* const)aCmd{
+    NSLog(@"Sending %@ to TUBii\n",aCmd);
+    [connection okCommand: [aCmd UTF8String]];
 }
 - (int) sendIntCmd: (NSString* const) aCmd {
-    @try {
-        NSLog(@"Sending %@ to TUBii\n",aCmd);
-        return [connection intCommand: [aCmd UTF8String]];
-    }
-    @catch (NSException *exception) {
-        NSLogColor([NSColor redColor],@"Command: %@ failed.  Reason: %@\n", aCmd,[exception reason]);
-        return nil;
-    }
+    NSLog(@"Sending %@ to TUBii\n",aCmd);
+    return [connection intCommand: [aCmd UTF8String]];
 }
 #pragma mark •••HW Access
 - (void) Initialize {
@@ -233,12 +215,19 @@ NSString* ORTubiiSettingsChangedNotification    = @"ORTubiiSettingsChangedNotifi
     NSString* const command = [NSString stringWithFormat:@"SetPrescaleTrigger %u %u",factor,mask];
     [self sendOkCmd:command];
 }
+
 - (void) setTUBiiPGT_Rate:(float)rate {
     NSString* const command = [NSString stringWithFormat:@"SetTUBiiPGT %f",rate];
     [self sendOkCmd:command];
     currentState.TUBiiPGT_Rate = rate;
     [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
 }
+
+- (void) setTUBiiPGT_RateInState:(float)rate {
+    currentState.TUBiiPGT_Rate = rate;
+    [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
+}
+
 - (float) TUBiiPGT_Rate {
     NSString* const command = @"GetTUBiiPGT";
     return [self sendIntCmd:command];
@@ -327,6 +316,10 @@ NSString* ORTubiiSettingsChangedNotification    = @"ORTubiiSettingsChangedNotifi
     NSString* command = [NSString stringWithFormat:@"SetTelliePulser %f %f %d", tellieRate,telliePulseWidth,tellieNPulses];
     [self sendOkCmd:command];
 }
+- (void) setTellieMode:(BOOL) _tellieMode{
+    NSString* command = [NSString stringWithFormat:@"SetTellieMode %d",_tellieMode];
+    [self sendOkCmd:command];
+}
 - (void) stopTelliePulser {
     // Stops the Tellie pulser by setting the number of pulses to be fired to zero.
     [self setTellieNPulses:0];
@@ -389,6 +382,12 @@ NSString* ORTubiiSettingsChangedNotification    = @"ORTubiiSettingsChangedNotifi
     currentState.CaenGainMask = aGainMask;
     [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
 }
+-(void) setCaenMasksInState: (CAEN_CHANNEL_MASK)aChannelMask
+            GainMask:(CAEN_GAIN_MASK) aGainMask; {
+    currentState.CaenChannelMask = aChannelMask;
+    currentState.CaenGainMask = aGainMask;
+    [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
+}
 -(CAEN_CHANNEL_MASK) caenChannelMask {
     // See comments in setCaenMask for info
     NSString* const command = @"GetCAENChannelSelectWord";
@@ -407,6 +406,11 @@ NSString* ORTubiiSettingsChangedNotification    = @"ORTubiiSettingsChangedNotifi
     // See TUBii schematic page 13A for more info
     NSString* const command = [NSString stringWithFormat:@"SetGTDelays %d %d",aLOMask,aDGTMask];
     [self sendOkCmd:command];
+    currentState.DGT_Bits = aDGTMask;
+    currentState.LO_Bits = aLOMask;
+    [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
+}
+- (void) setGTDelaysBitsInState:(NSUInteger)aDGTMask LOBits:(NSUInteger)aLOMask {
     currentState.DGT_Bits = aDGTMask;
     currentState.LO_Bits = aLOMask;
     [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
@@ -457,6 +461,7 @@ NSString* ORTubiiSettingsChangedNotification    = @"ORTubiiSettingsChangedNotifi
     // DGT delay on TUBii
     return [self ConvertValueToBits:Nanoseconds NBits:8 MinVal:0 MaxVal:510];
 }
+
 - (void) setTrigMask:(NSUInteger)_syncTrigMask setAsyncMask:(NSUInteger)_asyncTrigMask{
     // Sets which trigger inputs are capable causing TUBii to issue a Raw Trigger
     // This function is handled entierly within the MicroZed processing logic.
@@ -467,13 +472,20 @@ NSString* ORTubiiSettingsChangedNotification    = @"ORTubiiSettingsChangedNotifi
     currentState.asyncTrigMask = _asyncTrigMask;
     [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
 }
+
+- (void) setTrigMaskInState:(NSUInteger)_syncTrigMask setAsyncMask:(NSUInteger)_asyncTrigMask{
+    currentState.syncTrigMask = _syncTrigMask;
+    currentState.asyncTrigMask = _asyncTrigMask;
+    [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
+}
+
 - (NSUInteger) syncTrigMask {
     // See comment in setTrigMask for info.
-    return [connection intCommand: "GetSyncTriggerMask"];
+    return [self sendIntCmd:@"GetSyncTriggerMask"];
 }
 - (NSUInteger) asyncTrigMask {
     // See comment in setTrigMask for info.
-    return [connection intCommand: "GetAsyncTriggerMask"];
+    return [self sendIntCmd:@"GetAsyncTriggerMask"];
 }
 - (void) setSmellieDelay:(NSUInteger)_smellieDelay {
     // This specifies (in nanoseconds) how long the MicroZed should delay a pulse that
@@ -487,7 +499,7 @@ NSString* ORTubiiSettingsChangedNotification    = @"ORTubiiSettingsChangedNotifi
 }
 - (NSUInteger) smellieDelay {
     // See comments setSmellieDelay for info
-    return [connection intCommand: "GetSmellieDelay"];
+    return [self sendIntCmd:@"GetSmellieDelay"];
 }
 - (void) setTellieDelay:(NSUInteger)_tellieDelay {
     // This specifies (in nanoseconds) how long the MicroZed should delay a pulse that
@@ -532,6 +544,13 @@ NSString* ORTubiiSettingsChangedNotification    = @"ORTubiiSettingsChangedNotifi
     currentState.counterMask = _counterMask;
     [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
 }
+- (void) setCounterMaskInState:(NSUInteger)_counterMask {
+
+    NSLogColor([NSColor redColor], @"setCounterMaskInState: 0x%X\n",_counterMask);
+
+    currentState.counterMask = _counterMask;
+    [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
+}
 - (NSUInteger) counterMask {
     // See comments in setCounterMask for info
     return [self sendIntCmd:@"GetCounterMask"];
@@ -548,6 +567,10 @@ NSString* ORTubiiSettingsChangedNotification    = @"ORTubiiSettingsChangedNotifi
     // See TUBii schematics page 4 for even more info
     NSString * const command = [NSString stringWithFormat:@"SetControlReg %d",_controlReg];
     [self sendOkCmd:command];
+    currentState.controlReg = _controlReg;
+    [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
+}
+- (void) setControlRegInState:(CONTROL_REG_MASK)_controlReg {
     currentState.controlReg = _controlReg;
     [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
 }
@@ -592,6 +615,10 @@ NSString* ORTubiiSettingsChangedNotification    = @"ORTubiiSettingsChangedNotifi
     currentState.MTCAMimic1_ThresholdInBits = _MTCAMimic1_ThresholdInBits;
     [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
 }
+- (void) setMTCAMimic1_ThresholdInBitsInState:(NSUInteger)_MTCAMimic1_ThresholdInBits {
+    currentState.MTCAMimic1_ThresholdInBits = _MTCAMimic1_ThresholdInBits;
+    [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
+}
 - (NSUInteger) MTCAMimic1_ThresholdInBits {
     // See setMTCAMimic1_Threshold for more info
     return [self sendIntCmd:@"GetDACThreshold"];
@@ -628,6 +655,10 @@ NSString* ORTubiiSettingsChangedNotification    = @"ORTubiiSettingsChangedNotifi
     currentState.speakerMask = _speakerMask;
     [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
 }
+- (void) setSpeakerMaskInState:(NSUInteger)_speakerMask{
+    currentState.speakerMask = _speakerMask;
+    [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
+}
 - (NSUInteger) speakerMask {
     // See comment in setSpeakerMask for info about the speaker mask.
     NSString* const command = @"GetSpeakerMask";
@@ -652,6 +683,17 @@ NSString* ORTubiiSettingsChangedNotification    = @"ORTubiiSettingsChangedNotifi
         controlReg &= ~lockoutSel_Bit;
     }
     [self setControlReg: controlReg];
+}
+- (void) setTUBiiIsLOSrcInState:(BOOL)isSrc {
+    CONTROL_REG_MASK controlReg = currentState.controlReg;
+    if (!isSrc){
+        controlReg |= lockoutSel_Bit;
+    }
+    else {
+        controlReg &= ~lockoutSel_Bit;
+    }
+    currentState.controlReg = controlReg;
+    [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
 }
 - (BOOL) TUBiiIsLOSrc {
     // Note if TUBii is the LO source than the lockoutSel_Bit should be low.
@@ -680,6 +722,17 @@ NSString* ORTubiiSettingsChangedNotification    = @"ORTubiiSettingsChangedNotifi
         controlReg &= ~clkSel_Bit;
     }
     [self setControlReg: controlReg];
+}
+- (void) setTUBiiIsDefaultClockInState: (BOOL) IsDefault {
+    CONTROL_REG_MASK controlReg = currentState.controlReg;
+    if (IsDefault){
+        controlReg |= clkSel_Bit;
+    }
+    else {
+        controlReg &= ~clkSel_Bit;
+    }
+    currentState.controlReg = controlReg;
+    [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
 }
 - (BOOL) TUBiiIsDefaultClock {
     // See comment in setTUBiiIsDefaultClock for info
@@ -719,6 +772,10 @@ NSString* ORTubiiSettingsChangedNotification    = @"ORTubiiSettingsChangedNotifi
     else {
         [self sendOkCmd:@"CountMode 0"]; // Totalizer Mode
     }
+    currentState.CounterMode = mode;
+    [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
+}
+- (void) setCounterModeInState:(BOOL)mode {
     currentState.CounterMode = mode;
     [[NSNotificationCenter defaultCenter] postNotificationOnMainThreadWithName: ORTubiiSettingsChangedNotification object:self];
 }
@@ -861,7 +918,6 @@ NSString* ORTubiiSettingsChangedNotification    = @"ORTubiiSettingsChangedNotifi
 
 - (NSDictionary*) CurrentStateToDict
 {
-
     //Manually cherry-pick struct elements and store it into dictionary.
     NSMutableDictionary* TubiiStateDict = [NSMutableDictionary dictionaryWithCapacity:8];
     @try{
@@ -876,12 +932,11 @@ NSString* ORTubiiSettingsChangedNotification    = @"ORTubiiSettingsChangedNotifi
         [TubiiStateDict setObject:[NSNumber numberWithUnsignedInt:currentState.DGT_Bits] forKey:[self getStandardRunKeyForField:@"DGT_Bits"]];
         [TubiiStateDict setObject:[NSNumber numberWithUnsignedInt:currentState.LO_Bits] forKey:[self getStandardRunKeyForField:@"LO_Bits"]];
         [TubiiStateDict setObject:[NSNumber numberWithUnsignedInt:currentState.controlReg] forKey:[self getStandardRunKeyForField:@"controlReg"]];
+        return TubiiStateDict;
     } @catch(...){
         NSLogColor([NSColor redColor], @"TUBii: settings couldn't not be saved \n");
+        return NULL;
     }
-
-    return TubiiStateDict;
-
 }
 
 - (NSString*) getStandardRunKeyForField:(NSString*)aField
@@ -911,15 +966,20 @@ NSString* ORTubiiSettingsChangedNotification    = @"ORTubiiSettingsChangedNotifi
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
     int counter = 0;
+    __block BOOL exceptionCheck = NO;
     while (![[self keepAliveThread] isCancelled]) {
-        @try{
-            dispatch_sync(dispatch_get_main_queue(), ^{
-                [self sendOkCmd:@"keepAlive" print:NO];
-            });
-        } @catch(NSException* e) {
-            NSLogColor([NSColor redColor], @"[TUBii]: Problem sending keep alive to TUBii server, reason: %@\n", [e reason]);
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            @try{
+                [connection okCommand:"keepAlive"];
+            } @catch(NSException* e) {
+                NSLogColor([NSColor redColor], @"[TUBii]: Problem sending keep alive to TUBii server, reason: %@\n", [e reason]);
+                exceptionCheck = YES;
+            }
+        });
+        if(exceptionCheck){
             break;
         }
+        
         [NSThread sleepForTimeInterval:0.5];
 
         // This is a very long running thread need to relase the pool every so often
