@@ -88,8 +88,8 @@
 {
     
     //Basic ops
-    BOOL locked						= [gSecurity isLocked:ORTubiiLockNotification];
-    BOOL lockedOrNotRunningMaintenance = [gSecurity runInProgressButNotType:eMaintenanceRunType orIsLocked:ORTubiiLockNotification];
+    BOOL locked						= false;//[gSecurity isLocked:ORTubiiLockNotification];
+    BOOL lockedOrNotRunningMaintenance = false;//[gSecurity runInProgressButNotType:eMaintenanceRunType orIsLocked:ORTubiiLockNotification];
     
     //Tubii
     [tubiiLockButton setState: locked];
@@ -224,13 +224,15 @@
     err &= [caenGainSelect_6 selectCellWithTag:(GainMask & gainSel_6)>0];
     err &= [caenGainSelect_7 selectCellWithTag:(GainMask & gainSel_7)>0];
     //Speaker
+    NSLog(@"%i\n",theTUBiiState.speakerMask);
     [SpeakerMaskField setStringValue:[NSString stringWithFormat:@"%@",@(theTUBiiState.speakerMask)]];
     [self SendBitInfo:theTUBiiState.speakerMask FromBit:0 ToBit:16 ToCheckBoxes:SpeakerMaskSelect_1];
-    [self SendBitInfo:theTUBiiState.speakerMask FromBit:16 ToBit:32 ToCheckBoxes:SpeakerMaskSelect_2];
+    [self SendBitInfo:(theTUBiiState.speakerMask >> 16) FromBit:16 ToBit:24 ToCheckBoxes:SpeakerMaskSelect_2];
+    NSLog(@"%i \t %i\n",SpeakerMaskSelect_1, SpeakerMaskSelect_2);
     //Counter
     [CounterMaskField setStringValue:[NSString stringWithFormat:@"%@",@(theTUBiiState.counterMask)]];
     [self SendBitInfo:theTUBiiState.counterMask FromBit:0 ToBit:16 ToCheckBoxes:CounterMaskSelect_1];
-    [self SendBitInfo:theTUBiiState.counterMask FromBit:16 ToBit:32 ToCheckBoxes:CounterMaskSelect_2];
+    [self SendBitInfo:(theTUBiiState.counterMask >> 16) FromBit:16 ToBit:32 ToCheckBoxes:CounterMaskSelect_2];
     //GTDelay
     float LO_Delay = [model LODelay_BitsToNanoSeconds:theTUBiiState.LO_Bits];
     [LO_Slider setIntValue:LO_Delay];
@@ -572,7 +574,8 @@
     NSMatrix *maskSelect_1 =nil;
     NSMatrix *maskSelect_2 =nil;
     NSTextField *textField = nil;
-
+    NSLog(@"%i \t %i\n",SpeakerMaskSelect_1, SpeakerMaskSelect_2);
+    
     if ([sender tag] ==1)
     {
         @try {
@@ -583,6 +586,7 @@
         }
         maskSelect_1 = SpeakerMaskSelect_1;
         maskSelect_2 = SpeakerMaskSelect_2;
+        NSLog(@"%i \t %i\n",maskSelect_1, maskSelect_2);
         textField = SpeakerMaskField;
     }
     else if ([sender tag]==2)
@@ -1052,7 +1056,7 @@
     //Helper function to send a bit value to a bunch of check boxes
     for (int i=low;i<high;i++)
     {
-        if( (maskVal & 1<<i)>0 )
+        if( (maskVal & 1<<i-low)>0 )
         {
             [[aMatrix cellWithTag:i] setState:1];
         }
